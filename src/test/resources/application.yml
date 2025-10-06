@@ -1,0 +1,11 @@
+server:
+  port: 6667
+spring:
+  application:
+    name: simple-mcp-toolservice
+
+webstep:
+  ai:
+    mcp:
+      name: "webstep-mcp"
+      version: "0.0.1-dev"
