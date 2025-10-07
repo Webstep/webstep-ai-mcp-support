@@ -9,8 +9,8 @@
         <version>3.5.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>no.webstep.ai.mcp</groupId>
-    <artifactId>support</artifactId>
+    <groupId>no.webstep.ai</groupId>
+    <artifactId>mcp-support</artifactId>
     <version>0.0.1</version>
     <properties>
         <maven.compiler.release>23</maven.compiler.release>
@@ -93,6 +93,17 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
