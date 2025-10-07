@@ -20,7 +20,7 @@ Maven:
 
 <dependency>
     <groupId>no.webstep.ai</groupId>
-    <artifactId>mcp.support</artifactId>
+    <artifactId>mcp-support</artifactId>
     <version>0.0.1</version>
 </dependency>
 ```
