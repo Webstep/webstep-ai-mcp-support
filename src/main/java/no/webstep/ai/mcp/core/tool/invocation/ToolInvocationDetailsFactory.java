@@ -1,18 +1,15 @@
 package no.webstep.ai.mcp.core.tool.invocation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
-import no.webstep.ai.mcp.core.schema.SchemaBuilder;
 import no.webstep.ai.mcp.core.schema.impl.ToolSchemaProviderResolver;
 import no.webstep.ai.mcp.core.tool.McpTool;
 import no.webstep.ai.mcp.core.tool.McpToolProvider;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -27,16 +24,15 @@ public class ToolInvocationDetailsFactory {
     private final ToolSchemaProviderResolver toolSchemaProviderResolver;
     private final OptionalParamDetector optionalParamDetector;
 
-
     public ToolInvocationDetails getMcpToolMethod(McpToolProvider owner, Method method, McpTool annotation) {
         Objects.requireNonNull(owner, "owner");
         Objects.requireNonNull(method, "method");
         Objects.requireNonNull(annotation, "annotation");
-
+        final boolean isStatic = Modifier.isStatic(method.getModifiers());
         final String baseName = annotation.name().isBlank() ? method.getName() : annotation.name();
         final String toolName = annotation.omitClassName() ? baseName : owner.name() + "_" + baseName;
 
-        if (!method.canAccess(owner)) {
+        if (!method.canAccess(isStatic ? null : owner)) {
             method.setAccessible(true);
         }
 

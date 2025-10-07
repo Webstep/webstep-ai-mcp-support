@@ -5,11 +5,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.webstep.ai.mcp.exception.JsonRpcErrorCode;
+import no.webstep.ai.mcp.exception.JsonRpcServerException;
 import no.webstep.ai.mcp.protocol.cursor.JsonRpcProtocolHelper;
-import no.webstep.ai.mcp.core.rpc.exceptions.JsonRpcServerException;
-import no.webstep.ai.mcp.protocol.JsonRpcErrorCodes;
 
-import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,6 @@ public class JsonRpcService {
     private final JsonRpcExecution jsonRpcExecution;
     private final JsonRpcExecutorManager rpcExecutorManager;
     private final JsonRpcProtocolHelper jsonRpcEnvelopeFactory;
-    private final Clock clock;
 
 
     public class RpcCallable implements Callable<Optional<ObjectNode>> {
@@ -81,7 +79,7 @@ public class JsonRpcService {
                     final JsonNode idNode = (raw != null && raw.isObject()) ? raw.get("id") : null;
                     final Optional<ObjectNode> theToolTimedOut = jsonRpcEnvelopeFactory.errorEnvelope(
                             idNode,
-                            JsonRpcErrorCodes.TIMEOUT,
+                            JsonRpcErrorCode.TIMEOUT,
                             "The tool timed out");
                     if (theToolTimedOut.isPresent()) {
                         result.add(theToolTimedOut.get());
@@ -91,7 +89,7 @@ public class JsonRpcService {
             return jsonRpcEnvelopeFactory.toArray(result);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new JsonRpcServerException(JsonRpcErrorCodes.PROCESSING_INTERRUPTED,
+            throw new JsonRpcServerException(JsonRpcErrorCode.PROCESSING_INTERRUPTED,
                     "Server was interrupted. Likely shutting down.");
         }
     }

@@ -1,11 +1,16 @@
 package no.webstep.ai.mcp.protocol.rest;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.webstep.ai.mcp.core.McpToolService;
+import no.webstep.ai.mcp.core.rpc.handlers.ToolsCallHandler;
+import no.webstep.ai.mcp.exception.McpApi;
 import no.webstep.ai.mcp.protocol.cursor.CursorHandler;
-import no.webstep.ai.mcp.protocol.McpApi;
-import no.webstep.ai.mcp.protocol.dto.*;
+import no.webstep.ai.mcp.protocol.dto.Capabilities;
+import no.webstep.ai.mcp.protocol.dto.Tool;
+import no.webstep.ai.mcp.protocol.dto.ToolsCapability;
+import no.webstep.ai.mcp.protocol.dto.ToolsListResult;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +27,7 @@ import java.util.List;
 public class McpRestController {
 
     private final McpToolService toolService;
+    private final ToolsCallHandler toolsCallHandler;
     private final CursorHandler cursorHandler;
 
     @GetMapping(value = "/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -40,8 +46,8 @@ public class McpRestController {
     }
 
     @PostMapping(value = "/tools/{name}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ToolResult callTool(@PathVariable String name, @RequestBody(required = false) InvokeRequest req) throws Exception {
-        return toolService.callTool(name, req);
+    public JsonNode callTool(@PathVariable String name, @RequestBody JsonNode arguments) {
+        return toolsCallHandler.handle(name, arguments);
     }
 
 

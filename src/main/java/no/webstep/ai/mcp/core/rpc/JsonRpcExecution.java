@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.webstep.ai.mcp.core.exception.InvalidParamsException;
+import no.webstep.ai.mcp.core.rpc.handlers.JsonRpcMethodHandler;
+import no.webstep.ai.mcp.exception.InvalidParamsException;
+import no.webstep.ai.mcp.exception.JsonRpcErrorCode;
+import no.webstep.ai.mcp.exception.JsonRpcServerException;
 import no.webstep.ai.mcp.protocol.ProtocolStatics;
 import no.webstep.ai.mcp.protocol.cursor.JsonRpcProtocolHelper;
-import no.webstep.ai.mcp.core.rpc.exceptions.JsonRpcServerException;
-import no.webstep.ai.mcp.core.rpc.handlers.JsonRpcMethodHandler;
-import no.webstep.ai.mcp.protocol.JsonRpcErrorCodes;
 import no.webstep.internals.ExceptionStringifier;
 
 import java.util.Optional;
@@ -30,25 +30,25 @@ public class JsonRpcExecution {
             log.warn("A JSON RPC envelope node ({}) is not an object", payloadIndex);
             return Optional.of(
                     jsonRpcEnvelopeFactory.errorEnvelope(
-                            JsonRpcErrorCodes.INVALID_REQUEST,
+                            JsonRpcErrorCode.INVALID_REQUEST,
                             "Invalid JSON RPC request at element %s".formatted(payloadIndex)));
 
         }
         final String jsonrpc = raw.path("jsonrpc").asText(null);
         if (!ProtocolStatics.VERSION.equals(jsonrpc)) {
             return jsonRpcEnvelopeFactory.errorEnvelope(idNode,
-                    JsonRpcErrorCodes.INVALID_REQUEST, "Unsupported version (%s). Should be 2.0"
+                    JsonRpcErrorCode.INVALID_REQUEST, "Unsupported version (%s). Should be 2.0"
                             .formatted(jsonrpc));
         }
         final String method = raw.path("method").asText(null);
         if (method == null) {
             return jsonRpcEnvelopeFactory.errorEnvelope(idNode,
-                    JsonRpcErrorCodes.INVALID_REQUEST, "Method not specified");
+                    JsonRpcErrorCode.INVALID_REQUEST, "Method not specified");
         }
         final JsonRpcMethodHandler handler = router.handlerFor(method);
         if (handler == null) {
             return jsonRpcEnvelopeFactory.errorEnvelope(idNode,
-                    JsonRpcErrorCodes.METHOD_NOT_FOUND, "Method not found (%s)".formatted(method));
+                    JsonRpcErrorCode.METHOD_NOT_FOUND, "Method not found (%s)".formatted(method));
         }
         final JsonNode params = raw.has("params") ? raw.get("params") : null;
         try {
@@ -56,7 +56,7 @@ public class JsonRpcExecution {
             return jsonRpcEnvelopeFactory.result(idNode, result);
         } catch (InvalidParamsException e) {
             return jsonRpcEnvelopeFactory.errorEnvelope(idNode,
-                    JsonRpcErrorCodes.INVALID_PARAMS,
+                    JsonRpcErrorCode.INVALID_PARAMS,
                     "Invalid params: %s".formatted(ExceptionStringifier.justCauses(e)));
         } catch (JsonRpcServerException e) {
             return jsonRpcEnvelopeFactory.errorEnvelope(idNode,
@@ -65,7 +65,7 @@ public class JsonRpcExecution {
         } catch (Exception e) {
             log.error("Unhandled JSON-RPC error for method {}", method, e);
             return jsonRpcEnvelopeFactory.errorEnvelope(idNode,
-                    JsonRpcErrorCodes.TOOL_EXECUTION,
+                    JsonRpcErrorCode.TOOL_EXECUTION,
                     "Method '%s' failed: %s".formatted(method, ExceptionStringifier.justCauses(e)));
         }
     }

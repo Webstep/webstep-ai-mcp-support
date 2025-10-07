@@ -1,8 +1,8 @@
 package no.webstep.ai.mcp.core.rpc.handlers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import no.webstep.ai.mcp.core.exception.InvalidParamsException;
-import no.webstep.ai.mcp.core.rpc.exceptions.JsonRpcServerException;
+import no.webstep.ai.mcp.exception.InvalidParamsException;
+import no.webstep.ai.mcp.exception.JsonRpcServerException;
 
 public interface JsonRpcMethodHandler {
     /** The JSON-RPC method name this handler serves (e.g., "tools/call"). */

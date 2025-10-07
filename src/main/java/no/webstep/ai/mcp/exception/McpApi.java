@@ -1,4 +1,4 @@
-package no.webstep.ai.mcp.protocol;
+package no.webstep.ai.mcp.exception;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import no.webstep.ai.mcp.exception.JsonRpcErrorCode;
 import no.webstep.ai.mcp.protocol.ProtocolStatics;
 
 import java.util.List;
@@ -43,25 +44,25 @@ public final class JsonRpcProtocolHelper {
     }
 
 
-    public Optional<ObjectNode> errorEnvelope(JsonNode id, int code, String message) {
+    public Optional<ObjectNode> errorEnvelope(JsonNode id, JsonRpcErrorCode code, String message) {
         if (id == null) {
             return Optional.empty();
         }
         final ObjectNode env = createWrapper(id);
 
         final ObjectNode error = mapper.createObjectNode();
-        error.put("code", code);
+        error.put("code", code.code());
         error.put("message", message);
 
         env.set("error", error);
         return Optional.of(env);
     }
 
-    public ObjectNode errorEnvelope(int code, String message) {
+    public ObjectNode errorEnvelope(JsonRpcErrorCode code, String message) {
         final ObjectNode env = createWrapper(null);
 
         final ObjectNode error = mapper.createObjectNode();
-        error.put("code", code);
+        error.put("code", code.code());
         error.put("message", message);
 
         env.set("error", error);

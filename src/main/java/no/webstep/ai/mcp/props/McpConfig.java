@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
 
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -13,6 +14,8 @@ public final class McpConfig {
 
     private final Binder binder;
     private final ConcurrentMap<ConfigKey<?>, Object> cache = new ConcurrentHashMap<>();
+
+    private final static Set<ConfigKey<?>> alerted = ConcurrentHashMap.newKeySet();
 
     public McpConfig(final Environment env) {
         this.binder = Binder.get(env);
@@ -36,7 +39,9 @@ public final class McpConfig {
         final T raw = binder.bind(key.key(), Bindable.of(key.type())).orElse(null);
         final T value = (raw == null) ? key.defaultValue() : raw;
         if (raw == null) {
-            log.warn("Configuration '{}' not set, using default: {}", key.key(), value);
+            if (alerted.add(key)) {
+                log.warn("Configuration '{}' not set, using default: {}", key.key(), value);
+            }
         }
         return (key.verify() != null) ? key.verify().apply(value, key) : value;
     }

@@ -3,7 +3,7 @@ package no.webstep.ai.mcp.protocol.rpc.rest;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.webstep.ai.mcp.protocol.McpApi;
+import no.webstep.ai.mcp.exception.McpApi;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

@@ -2,7 +2,7 @@ package no.webstep.ai.mcp.protocol.cursor;
 
 import lombok.RequiredArgsConstructor;
 import no.webstep.ai.mcp.core.McpToolProviderRegistry;
-import no.webstep.ai.mcp.core.rpc.exceptions.InvalidCursorException;
+import no.webstep.ai.mcp.exception.InvalidCursorException;
 
 import java.util.Base64;
 

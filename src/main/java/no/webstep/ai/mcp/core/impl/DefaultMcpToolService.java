@@ -4,17 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.webstep.ai.mcp.core.McpArgCoercion;
-import no.webstep.ai.mcp.core.McpToolService;
-import no.webstep.ai.mcp.protocol.dto.InvokeRequest;
-import no.webstep.ai.mcp.protocol.dto.Tool;
-import no.webstep.ai.mcp.protocol.dto.ToolResult;
-import no.webstep.ai.mcp.protocol.dto.content.TextContent;
 import no.webstep.ai.mcp.core.McpToolProviderRegistry;
+import no.webstep.ai.mcp.core.McpToolService;
 import no.webstep.ai.mcp.core.tool.invocation.StopChainThrowable;
 import no.webstep.ai.mcp.core.tool.invocation.ToolInvocationDetails;
 import no.webstep.ai.mcp.core.tool.invocation.ToolResultMapper;
+import no.webstep.ai.mcp.protocol.dto.Tool;
+import no.webstep.ai.mcp.protocol.dto.ToolResult;
+import no.webstep.ai.mcp.protocol.dto.content.TextContent;
 import no.webstep.internals.ExceptionStringifier;
 
+import java.lang.reflect.Modifier;
 import java.util.Comparator;
 import java.util.List;
 
@@ -43,25 +43,19 @@ public class DefaultMcpToolService implements McpToolService {
 
 
     @Override
-    public ToolResult callTool(String toolName, InvokeRequest req) {
-        final InvokeRequest request = McpRequestNormalizer.normalize(req);
-
-        final ToolInvocationDetails toolMethod = registry.findByName(toolName)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown tool: " + toolName));
-
-        final Object[] argv = coercion.coerceArgs(toolMethod, request);
+    public ToolResult callTool(ToolInvocationDetails toolMethod, Object[] args) {
         final Object target = toolMethod.owner();
-
+        final boolean staticMethod = Modifier.isStatic(toolMethod.method().getModifiers());
         try {
-            final Object result = toolMethod.method().invoke(target, argv);
+            final Object result = toolMethod.method().invoke(staticMethod ? null : target, args);
             return resultMapper.map(result, toolMethod.contentStyle());
         } catch (StopChainThrowable stop) {
-            log.info("Tool '{}' requested to stop the execution plan early", toolName);
+            log.info("Tool '{}' requested to stop the execution plan early", toolMethod.name());
             return ToolResult.stopChain(mapper,
                     resultMapper.map(stop.payload(), toolMethod.contentStyle()),
                     stop.payload());
         } catch (Exception e) {
-            log.warn("Tool '{}' failed", toolName, e);
+            log.warn("Tool '{}' failed", toolMethod, e);
             final TextContent text = new TextContent("ERROR: " + ExceptionStringifier.justCauses(e));
             return new ToolResult(text, true, null);
         }

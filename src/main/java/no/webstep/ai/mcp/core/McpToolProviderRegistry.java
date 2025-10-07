@@ -6,6 +6,7 @@ import no.webstep.ai.mcp.core.tool.McpTool;
 import no.webstep.ai.mcp.core.tool.McpToolProvider;
 import no.webstep.ai.mcp.core.tool.invocation.ToolInvocationDetails;
 import no.webstep.ai.mcp.core.tool.invocation.ToolInvocationDetailsFactory;
+import org.springframework.aop.support.AopUtils;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -15,13 +16,12 @@ import java.util.*;
 public class McpToolProviderRegistry {
 
     private final Map<String, ToolInvocationDetails> byName = new HashMap<>();
-
     private final ToolInvocationDetailsFactory toolInvocationDetailsFactory;
 
     public synchronized void install(McpToolProvider mcpToolProvider) {
         Objects.requireNonNull(mcpToolProvider, "mcpToolProvider");
 
-        final Class<?> clazz = mcpToolProvider.getClass();
+        final Class<?> clazz = AopUtils.getTargetClass(mcpToolProvider);
 
         final List<ToolInvocationDetails> discovered = new ArrayList<>();
 
@@ -44,9 +44,9 @@ public class McpToolProviderRegistry {
                 log.warn("Duplicate tool name for {} @ {}.{}.", t.name(), t.owner().getClass().getName(), t.method().getName());
                 throw new IllegalStateException("Duplicate tool invocation found: " + toolInvocationDetails);
             }
-            log.info("Installed {} tool(s) from provider {}: {}", discovered.size(), t.name(),
-                    discovered.stream().map(ToolInvocationDetails::name).toList());
+            log.info("Installed McpTool {} from provider {}: ", t.name(), mcpToolProvider.getClass().getName());
         }
+
     }
 
     public synchronized Optional<ToolInvocationDetails> findByName(String name) {

@@ -1,6 +1,6 @@
-package no.webstep.ai.mcp.core.rpc.exceptions;
+package no.webstep.ai.mcp.exception;
 
-public class InvalidCursorException extends RuntimeException {
+public class InvalidCursorException extends InvalidParamsException {
     public InvalidCursorException(String message) {
         super(message);
     }
